@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZombieLabBrains — Зомби-лаборатория 3D Basic Edition</title>
+    <style>
+        /* ===== Reset & Base ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0b0f0a;
+            --surface: #151d12;
+            --surface-light: #1f2a1b;
+            --accent: #7ac74f;
+            --accent-glow: #9be564;
+            --danger: #c94b4b;
+            --text: #d3e0c8;
+            --muted: #8a9b82;
+            --border: #2c3a26;
+            --radius: 12px;
+            --transition: 0.25s ease;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+        a:hover {
+            color: var(--accent-glow);
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-glow);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin: 1.5rem 0 0.8rem;
+            color: var(--accent);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        code, pre {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            background: #0d120a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.9em;
+            color: #b8d8a2;
+        }
+
+        pre {
+            padding: 1.2rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            background: #0d120a;
+        }
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        th, td {
+            padding: 0.8rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--surface-light);
+            color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(122,199,79,0.05);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ===== Header / Navigation ===== */
+        header {
+            background: rgba(11,15,10,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 15px rgba(122,199,79,0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.8rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color var(--transition), text-shadow var(--transition);
+        }
+        .nav-links a:hover {
+            color: var(--accent-glow);
+            text-shadow: 0 0 10px rgba(122,199,79,0.4);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(11,15,10,0.98);
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--border);
+                gap: 1rem;
+            }
+            .nav-links.active {
+                display: flex;
+            }
+        }
+
+        /* ===== Hero ===== */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: radial-gradient(circle at 30% 40%, rgba(122,199,79,0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 70% 80%, rgba(201,75,75,0.1) 0%, transparent 50%),
+                        var(--bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: repeating-conic-gradient(rgba(122,199,79,0.03) 0% 25%, transparent 0% 50%);
+            animation: rotate 60s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(122,199,79,0.7), 0 0 60px rgba(122,199,79,0.3);
+        }
+
+        .hero .tagline {
+            font-size: 1.4rem;
+            color: var(--accent-glow);
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2.2rem;
+            background: var(--accent);
+            color: #0b0f0a;
+            font-weight: 700;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 20px rgba(122,199,79,0.3);
+            margin: 0.5rem;
+        }
+        .btn:hover {
+            background: var(--accent-glow);
+            box-shadow: 0 0 35px rgba(122,199,79,0.6);
+            transform: translateY(-2px);
+            color: #0b0f0a;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-outline:hover {
+            background: var(--accent);
+            color: #0b0f0a;
+        }
+
+        /* ===== Sections ===== */
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-alt {
+            background: var(--surface);
+            border-radius: 20px;
+            margin: 2rem auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--surface-light);
+            padding: 1.8rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .feature-card h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(122,199,79,0.15);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .mod-example {
+            background: #0d120a;
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 0 var(--radius) var(--radius) 0;
+            margin: 1.5rem 0;
+        }
+
+        .tree {
+            font-family: monospace;
+            background: #0d120a;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            line-height: 1.8;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        footer {
+            background: #070a05;
+            border-top: 1px solid var(--border);
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .mission-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 0.5rem 0;
+        }
+        .mission-item::before {
+            content: '🧠';
+            font-size: 1.3rem;
+        }
+
+        .control-key {
+            display: inline-block;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.2rem 0.6rem;
+            font-family: monospace;
+            font-weight: bold;
+            min-width: 2rem;
+            text-align: center;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            .nav {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="nav">
+            <div class="logo">🧟 ZombieLabBrains</div>
+            <button class="menu-toggle" id="menuToggle" aria-label="Меню">☰</button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#about">О игре</a></li>
+                <li><a href="#install">Установка</a></li>
+                <li><a href="#controls">Управление</a></li>
+                <li><a href="#mechanics">Механики</a></li>
+                <li><a href="#mods">Моды</a></li>
+                <li><a href="#structure">Структура</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>ZombieLabBrains</h1>
+            <p class="tagline">Зомби-лаборатория 3D — Basic Edition (BAS)</p>
+            <p>Псевдо-трёхмерная игра с элементами кликера и стратегии. Станьте безумным учёным, создайте армию зомби и захватите деревни!</p>
+            <div>
+                <a href="#install" class="btn">Начать игру</a>
+                <a href="#mods" class="btn btn-outline">Создать мод</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about">
+        <div class="container">
+            <h2>🧪 Об игре</h2>
+            <p>В <strong>Зомби-лаборатории 3D</strong> вы управляете безумным учёным, который создаёт армию зомби для захвата окрестных деревень. Издание Basic Edition включает упрощённый геймплей:</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🫧 Пузырьки</h4>
+                    <p>Лопайте пузырьки, нажимая соответствующие клавиши, чтобы получать мозги. Улучшайте силу лопания за мозги.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚔️ Стратегия</h4>
+                    <p>Атакуйте ближайшие поселения, захватывайте их и получайте мозги.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📜 Миссии</h4>
+                    <p>Две обучающие миссии: первый зомби и первая атака. Награда — мозги.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🧩 Моды</h4>
+                    <p>Поддержка пользовательских модов через папку <code>mods</code>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Install -->
+    <section id="install" class="section-alt">
+        <div class="container">
+            <h2>⚙️ Установка и запуск</h2>
+            <div class="feature-grid" style="grid-template-columns: 1fr 1fr;">
+                <div>
+                    <h3>Требования</h3>
+                    <ul style="list-style: none; margin-left: 1rem;">
+                        <li>✅ Python 3.7 или выше</li>
+                        <li>✅ Библиотека Pygame</li>
+                    </ul>
+                    <h3>Шаги</h3>
+                    <ol style="margin-left: 1.5rem;">
+                        <li>Установите зависимости: <code>pip install pygame</code></li>
+                        <li>Сохраните файл <code>main.py</code> в отдельную папку.</li>
+                        <li>Запустите игру: <code>python main.py</code></li>
+                    </ol>
+                </div>
+                <div>
+                    <h3>Быстрый старт</h3>
+                    <pre><code># 1. Создайте папку проекта
+mkdir zombie_basic
+cd zombie_basic
+
+# 2. Установите Pygame
+pip install pygame
+
+# 3. Сохраните main.py (см. документацию)
+
+# 4. Запуск
+python main.py</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Controls -->
+    <section id="controls">
+        <div class="container">
+            <h2>🎮 Управление</h2>
+            <table>
+                <thead>
+                    <tr><th>Клавиша</th><th>Действие</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="control-key">W</span></td><td>Движение вперёд</td></tr>
+                    <tr><td><span class="control-key">S</span></td><td>Движение назад</td></tr>
+                    <tr><td><span class="control-key">A</span></td><td>Поворот влево</td></tr>
+                    <tr><td><span class="control-key">D</span></td><td>Поворот вправо</td></tr>
+                    <tr><td><span class="control-key">←</span> / <span class="control-key">→</span></td><td>Поворот (альтернативно)</td></tr>
+                    <tr><td><span class="control-key">E</span></td><td>Взаимодействие с объектами (компьютер, стол)</td></tr>
+                    <tr><td><span class="control-key">Esc</span></td><td>Выход в меню</td></tr>
+                    <tr><td><span class="control-key">Space</span> / <span class="control-key">Enter</span></td><td>Пропустить интро</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Mechanics -->
+    <section id="mechanics" class="section-alt">
+        <div class="container">
+            <h2>🧠 Игровые механики</h2>
+
+            <h3>🏭 Производство зомби</h3>
+            <ul style="margin-left: 1.5rem;">
+                <li>Подойдите к столу (коричневый квадрат на карте) и нажмите <span class="control-key">E</span>.</li>
+                <li>Лопайте пузырьки, нажимая указанные на них клавиши, чтобы получать мозги.</li>
+                <li>При накоплении <strong>1000 мозгов</strong> автоматически создаётся 1 зомби.</li>
+                <li>Силу лопания можно улучшить за мозги (кнопка «Улучшить лопание»).</li>
+            </ul>
+
+            <h3>⚔️ Атака деревень</h3>
+            <ul style="margin-left: 1.5rem;">
+                <li>Подойдите к компьютеру (бирюзовый квадрат) и нажмите <span class="control-key">E</span>.</li>
+                <li>Выберите пункт «Атака деревень».</li>
+                <li>Стрелками <span class="control-key">↑</span> / <span class="control-key">↓</span> выберите цель.</li>
+                <li>Нажмите «Атаковать».</li>
+                <li>Победа приносит мозги и захватывает деревню. Поражение уменьшает армию наполовину.</li>
+            </ul>
+
+            <h3>📋 Миссии</h3>
+            <div class="mission-item">Первый зомби — создайте хотя бы одного зомби.</div>
+            <div class="mission-item">Атака деревни — захватите первую деревню.</div>
+            <p style="margin-top: 1rem;">За выполнение миссий начисляются <strong>мозги</strong> — внутриигровая валюта.</p>
+        </div>
+    </section>
+
+    <!-- Mods -->
+    <section id="mods">
+        <div class="container">
+            <h2>🔧 Поддержка модов</h2>
+            <p>Игра автоматически загружает пользовательские моды из папки <code>mods</code>, расположенной рядом с <code>main.py</code>.</p>
+
+            <h3>Как создать мод</h3>
+            <ol style="margin-left: 1.5rem;">
+                <li>Создайте в папке <code>mods</code> файл с расширением <code>.py</code> (например, <code>cheap_zombies.py</code>).</li>
+                <li>Внутри определите функцию <code>apply_mod(game)</code>, которая изменяет параметры игры.</li>
+            </ol>
+
+            <div class="mod-example">
+                <strong>Пример мода</strong> (<code>mods/cheap_zombies.py</code>):
+                <pre><code>def apply_mod(game):
+    game.zombie_cost = 50      # снижаем стоимость зомби
+    game.click_power = 2       # увеличиваем силу лопания пузырьков</code></pre>
+            </div>
+            <p>После запуска игры мод будет автоматически применён.</p>
+
+            <h3>Настройки</h3>
+            <p>В главном меню доступны:</p>
+            <ul style="margin-left: 1.5rem;">
+                <li>Полноэкранный режим (переключение).</li>
+                <li>Выход из игры.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Structure -->
+    <section id="structure" class="section-alt">
+        <div class="container">
+            <h2>📁 Структура проекта</h2>
+            <div class="tree">
+zombie_basic/
+├── main.py            # Основной файл игры (вся логика)
+├── mods/              # Папка для модов (создаётся автоматически)
+└── README.md          # Документация
+            </div>
+        </div>
+    </section>
+
+    <!-- Author & License -->
+    <section id="author">
+        <div class="container" style="text-align: center;">
+            <h2 style="border-bottom: none;">👨‍🔬 Авторство</h2>
+            <p style="font-size: 1.2rem;"><span class="badge">Разработчик</span> ShadowLabs Ltd</p>
+            <p><span class="badge">Версия</span> 1.0</p>
+            <p><span class="badge">Лицензия</span> Все права защищены.</p>
+            <p style="color: var(--muted); font-style: italic;">Игра использует упрощённый рендеринг методом raycasting (псевдо-3D).<br>
+            Для работы в графическом режиме требуется установленный Pygame.<br>
+            Моды загружаются только при старте игры (до начала новой партии).</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2025 ShadowLabs Ltd. Все права защищены. ZombieLabBrains — Зомби-лаборатория 3D Basic Edition.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for mobile menu -->
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Закрытие меню при клике на ссылку (для мобильных)
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
+
+        // Плавный скролл с учётом высоты шапки
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerOffset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
